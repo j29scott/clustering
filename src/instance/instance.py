@@ -1,5 +1,7 @@
+
 class Instance:
     def __init__(self):
+
         self.dim = dim
         self.N = N
         self.clusterable = None

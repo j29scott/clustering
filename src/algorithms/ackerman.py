@@ -1,7 +1,8 @@
 import math
 from diptest.diptest import diptest
-import modality
+#import modality
 import matplotlib.pyplot as plt
+from src.dist_util import distance
 from sklearn.neighbors import NearestNeighbors
 import numpy as np
 from numpy.random import uniform
@@ -32,24 +33,24 @@ def hopkins(X):
  
     return H
 
-def euclid_distance(a,b):
-    assert len(a) == len(b) and len(a) > 0
-    ret = 0.0
-    for i in range(len(a)):
-        ret += (a[i] - b[i]) * (a[i] - b[i])
-    return math.sqrt(ret)
-
-def ackerman(instance):
-    distances = []
-    for i in range(len(instance.points)):
-        for j in range(i+1,len(instance.points)):
-            distances.append(euclid_distance(instance.points[i],instance.points[j]))
-    distances = np.array(distances)
-
+def ackerman_dist(instance):
+    distances = distance(instance)
     if len(distances) > 70000:
         distances = np.random.choice(distances, 70000)
-    plt.hist(distances)
-    plt.show()
     out = diptest(distances)
-    print(out,hopkins(instance.points))
-    return out[1] < ackerman_cutoff
+    return out[1] < ackerman_cutoff,out[1]
+
+def ackerman_score(features,labels,feature_names):
+    indx = feature_names.index('dip_p_value')
+    cor = 0
+    for i in range(len(features)):
+        assert len(features[i]) == len(feature_names)
+        c = features[i][indx] < ackerman_cutoff
+        l = labels[i] == 0.0
+        if c == l:
+            cor += 1
+    return cor/len(features)
+
+def hopkins_test(instance):
+    h = hopkins(instance.points)
+    return h > 0.75,7
