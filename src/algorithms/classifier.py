@@ -7,6 +7,7 @@ from diptest.diptest import diptest
 from sklearn import linear_model
 import numpy as np
 import modality
+import random
 from sklearn.decomposition import PCA
 
 def instance2features(instance,return_names=False):
@@ -34,7 +35,7 @@ def instance2features(instance,return_names=False):
 
             if test == 'silverman':
                 if 'p_value' in settings.modality_tests[test]:
-                    out = modality.silverman_bwtest(distances,alpha=0.05)
+                    out = modality.silverman_bwtest(np.random.choice(distances,250),alpha=0.05)
                     assert isinstance(out,float)
                     features.append(out)
                     feature_names.append(dist + '_silv_p_value')
