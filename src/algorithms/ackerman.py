@@ -41,10 +41,10 @@ def ackerman_dist(instance):
     return out[1] < ackerman_cutoff,out[1]
 
 def ackerman_score(features,labels,feature_names):
-    indx = feature_names.index('dip_p_value')
+    indx = feature_names.index('pnorm_dip_p_value')
     cor = 0
     for i in range(len(features)):
-        assert len(features[i]) == len(feature_names)
+        assert len(features[i]) == len(feature_names), print(len(features[i]), len(feature_names))
         c = features[i][indx] < ackerman_cutoff
         l = labels[i] == 0.0
         if c == l:

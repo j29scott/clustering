@@ -1,12 +1,15 @@
 import pdb
 import ast
 from sklearn import preprocessing,svm
+from sklearn.neural_network import MLPRegressor
 
 class NoiseStat:
-    def __init__(self,data_set='db/427/noise_data.list'):
-        file = open('db/427/noise_data.list')
+    def __init__(self,data_set='db/combined_noise_data.pylist'):
+        file = open(data_set,'r')
         inputs = []
         for line in file.readlines():
+            line = line.replace("array([","")
+            line = line.replace("])","")
             x = ast.literal_eval(line)
             inputs.append(x)
         features = []
@@ -17,9 +20,10 @@ class NoiseStat:
         self.scaler = preprocessing.StandardScaler()
         self.scaler.fit(features)
         features = self.scaler.transform(features)
-        self.model = svm.SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
-            gamma='auto', kernel='rbf', max_iter=-1, shrinking=True,
-            tol=0.001, verbose=False).fit(features,labels)
+        #self.model = svm.SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+        #    gamma='auto', kernel='rbf', max_iter=-1, shrinking=True,
+        #    tol=0.001, verbose=False).fit(features,labels)
+        self.model = MLPRegressor(solver='lbfgs', alpha=1e-5,hidden_layer_sizes=(5, 2), random_state=1).fit(features,labels)
 
     def predict(self,features):
         scaled_features = self.scaler.transform(features)

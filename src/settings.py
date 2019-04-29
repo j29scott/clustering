@@ -18,4 +18,4 @@ additional_statistics = [
     'hopkins'
 ]
 
-classifier = 'linear' ##['linear','svm','knn', 'perceptron']
+use_N_DIM = True

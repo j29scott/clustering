@@ -10,96 +10,58 @@ import modality
 import random
 from sklearn.decomposition import PCA
 
-def instance2features(instance,return_names=False):
-    features = []
+def get_feature_names():
     feature_names = []
-    features.append(instance.dim)
-    features.append(len(instance.points))
-    feature_names.append('dim')
-    feature_names.append('N')
+    if settings.use_N_DIM:
+        feature_names.append('dim')
+        feature_names.append('N')
+    for dist in settings.distances:
+        feature_names.append(dist + "_mean")
+        feature_names.append(dist + "_dev")
+        for test in settings.modality_tests:
+            if test == 'dip':
+                if 'dip_stat' in settings.modality_tests[test]:
+                    feature_names.append(dist + '_dip_stat')
+                if 'p_value' in settings.modality_tests[test]:
+                    feature_names.append(dist + '_dip_p_value')
+
+            if test == 'silverman':
+                if 'p_value' in settings.modality_tests[test]:
+                    feature_names.append(dist + '_silv_p_value')
+
+    for feat in settings.additional_statistics:
+        if feat == 'hopkins':
+            feature_names.append('hopkins')
+    
+    
+    return feature_names
+
+def instance2features(instance):
+    features = []
+    if settings.use_N_DIM:
+        features.append(instance.dim)
+        features.append(len(instance.points))  
     for dist in settings.distances:
         distances,mean,dev = dist_util.distance(instance,dist)
         features.append(mean)
-        feature_names.append(dist + "_mean")
         features.append(dev)
-        feature_names.append(dist + "_dev")
         for test in settings.modality_tests:
             if test == 'dip':
                 out = diptest(distances)
                 if 'dip_stat' in settings.modality_tests[test]:
                     features.append(out[0])
-                    feature_names.append(dist + '_dip_stat')
                 if 'p_value' in settings.modality_tests[test]:
                     features.append(out[1])
-                    feature_names.append(dist + '_dip_p_value')
 
             if test == 'silverman':
                 if 'p_value' in settings.modality_tests[test]:
                     out = modality.silverman_bwtest(np.random.choice(distances,250),alpha=0.05)
                     assert isinstance(out,float)
                     features.append(out)
-                    feature_names.append(dist + '_silv_p_value')
 
     for feat in settings.additional_statistics:
         if feat == 'hopkins':
             features.append(hopkins(instance.points))
-            feature_names.append('hopkins')
-    
-    
-    
-    assert len(features) == len(feature_names),print(len(features) ,len(feature_names))
-    if not return_names:
-        return features
-    return features,feature_names
-
-
-class Classifier:
-    def __init__(self):
-        self.model = None
-    def train(self,X,Y):
-        features = []
-        labels = []
-
-        for i in range(len(X)):
-            printer("Computing features: " +str(i/len(X) * 100.0))
-            features.append(instance2features(X[i]))
-            if Y[i] == True:
-                labels.append(1.0)
-            elif Y[i] == False:
-                labels.append(2.0)
-            else:
-                assert False
-            pdb.set_trace()
-
-        self.model = linear_model.SGDClassifier(max_iter=1000, tol=1e-3).fit(features,labels)
         
-    def predict(self,X,Y=None):
-        features = []
-        labels = []
-        for i in range(len(X)):
-            printer("Computing features: " +str(i/len(X) * 100.0))
-            features.append(instance2features(X[i]))
-            if Y[i] == True:
-                labels.append(1.0)
-            elif Y[i] == False:
-                labels.append(2.0)
-            else:
-                assert False
-        classes = self.model.predict(features)
-        pred = []
-        for c in classes:
-            if c == 1.0:
-                pred.append(True)
-            elif c == 2.0:
-                pred.append(False)
-            else:
-                assert False
-        if Y == None:
-            return pred
-        assert len(pred) == len(Y)
-        n = 0
-        for i in range(len(Y)):
-            if pred[i] == Y[i]:
-                n += 1
-        return pred,n/len(Y)
 
+    return features
