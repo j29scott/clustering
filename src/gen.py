@@ -3,10 +3,10 @@ from src.instance.gaussian import Gaussian
 from src.instance.uniform_random import Uniform_Random
 
 
-def instance_gen(N=1):
+def instance_gen(NGEN=1):
     instances = []
     labels = []
-    for i in range(N):
+    for i in range(NGEN):
         c = random.choice(['clusterable', 'not clusterable'])
         if c == 'clusterable':
                 labels.append(True)
@@ -14,7 +14,7 @@ def instance_gen(N=1):
                 instances.append(Gaussian(dim=random.choice(range(2,10)),
                                 num_clusters=random.choice(range(2,10)),
                                 N=random.choice(range(50,1000)),
-                                noise_frac= random.random()/3.0
+                                noise_frac= random.random()
                         ))
         else:
             labels.append(False)
@@ -28,6 +28,24 @@ def instance_gen(N=1):
                     ))
             elif c == 'uniform':
                 instances.append(Uniform_Random(dim=random.choice(range(2,10)),N=random.choice(range(50,1000))))
+    if NGEN==1:
+        return instances[0],labels[0]
+    return instances,labels
+
+
+def instance_rand_noise_gen(N=1):
+    instances = []
+    labels = []
+
+    for i in range(N):
+        labels.append(random.random())
+
+        instances.append(Gaussian(dim=random.choice(range(2,10)),
+                        num_clusters=random.choice(range(2,10)),
+                        N=random.choice(range(50,1000)),
+                        noise_frac= labels[-1]
+                ))
+
     if N==1:
         return instances[0],labels[0]
     return instances,labels

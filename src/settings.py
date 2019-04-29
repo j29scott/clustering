@@ -5,11 +5,13 @@ distances = [
     'pnorm'     ,
     'cheb'      ,
     'taxi'      ,
-    'minkowski' 
+    'minkowski' ,
+    'PCA'
 ]
 
 modality_tests = {
-    'dip': ['dip_stat', 'p_value']
+    'dip': ['dip_stat', 'p_value'],
+    'silverman' : ['p_value']
 }
 
 additional_statistics = [

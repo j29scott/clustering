@@ -12,6 +12,8 @@ from sklearn import linear_model
 from sklearn.svm import SVC
 from src.instance.uniform_random import Uniform_Random
 from sklearn import preprocessing
+from src.algorithms.noise_stat import NoiseStat
+from sklearn.ensemble import RandomForestClassifier
 
 inputs = []
 
@@ -33,14 +35,43 @@ for i in range(N):
     else:
         labels[i] = 1.0
 
-features = preprocessing.scale(features)
+print("Without Noise Stat")
+scaled_features = preprocessing.scale(features)
+lm  = linear_model.SGDClassifier(max_iter=1000, tol=1e-3).fit(scaled_features[:N//2],labels[:N//2]).score(scaled_features[N//2+1:],labels[N//2+1:])
+svm = SVC(gamma='auto').fit(scaled_features[:N//2],labels[:N//2]).score(scaled_features[N//2+1:],labels[N//2+1:])
+rf = RandomForestClassifier(n_estimators=10).fit(scaled_features[:N//2],labels[:N//2]).score(scaled_features[N//2+1:],labels[N//2+1:])
+ack = ackerman_score(scaled_features[:N//2],labels[:N//2],feature_names)
 
-lm  = linear_model.SGDClassifier(max_iter=1000, tol=1e-3).fit(features[:N//2],labels[:N//2]).score(features[N//2+1:],labels[N//2+1:])
-svm = SVC(gamma='auto').fit(features[:N//2],labels[:N//2]).score(features[N//2+1:],labels[N//2+1:])
-ack = ackerman_score(features[:N//2],labels[:N//2],feature_names)
+
 
 print("Ackerman: " + str(ack))
 print("SVM     : " + str(svm))
 print("LM      : " + str(lm))
+print("RF      : " + str(lm))
 print("")
-print("Improvement: " + str(100.0 * (max(lm,svm) - ack)/ack))
+print("Improvement: " + str(100.0 * (max(lm,svm,rf) - ack)/ack))
+print()
+
+print("With Noise Stat")
+
+ns_model = NoiseStat()
+print(ns_model.noise_test(features,labels))
+
+ns = ns_model.predict(features)
+for i in range(len(features)):
+    features[i].append(ns[i])
+scaled_features = preprocessing.scale(features)
+lm  = linear_model.SGDClassifier(max_iter=1000, tol=1e-3).fit(scaled_features[:N//2],labels[:N//2]).score(scaled_features[N//2+1:],labels[N//2+1:])
+svm = SVC(gamma='auto').fit(scaled_features[:N//2],labels[:N//2]).score(scaled_features[N//2+1:],labels[N//2+1:])
+rf = RandomForestClassifier(n_estimators=10).fit(scaled_features[:N//2],labels[:N//2]).score(scaled_features[N//2+1:],labels[N//2+1:])
+
+
+print()
+#ack = ackerman_score(features[:N//2],labels[:N//2],feature_names)
+print("Ackerman: " + str(ack))
+print("SVM     : " + str(svm))
+print("LM      : " + str(lm))
+print("RF      : " + str(lm))
+print("")
+print("Improvement: " + str(100.0 * (max(lm,svm,rf) - ack)/ack))
+print()

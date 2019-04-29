@@ -6,10 +6,16 @@ import pdb
 from diptest.diptest import diptest
 from sklearn import linear_model
 import numpy as np
+import modality
+from sklearn.decomposition import PCA
 
 def instance2features(instance,return_names=False):
     features = []
     feature_names = []
+    features.append(instance.dim)
+    features.append(len(instance.points))
+    feature_names.append('dim')
+    feature_names.append('N')
     for dist in settings.distances:
         distances,mean,dev = dist_util.distance(instance,dist)
         features.append(mean)
@@ -18,15 +24,20 @@ def instance2features(instance,return_names=False):
         feature_names.append(dist + "_dev")
         for test in settings.modality_tests:
             if test == 'dip':
-                if len(distances) > 70000:
-                    distances = np.random.choice(distances, 70000)
                 out = diptest(distances)
                 if 'dip_stat' in settings.modality_tests[test]:
                     features.append(out[0])
-                    feature_names.append('dip_stat')
+                    feature_names.append(dist + '_dip_stat')
                 if 'p_value' in settings.modality_tests[test]:
                     features.append(out[1])
-                    feature_names.append('dip_p_value')
+                    feature_names.append(dist + '_dip_p_value')
+
+            if test == 'silverman':
+                if 'p_value' in settings.modality_tests[test]:
+                    out = modality.silverman_bwtest(distances,alpha=0.05)
+                    assert isinstance(out,float)
+                    features.append(out)
+                    feature_names.append(dist + '_silv_p_value')
 
     for feat in settings.additional_statistics:
         if feat == 'hopkins':
