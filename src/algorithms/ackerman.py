@@ -54,3 +54,22 @@ def ackerman_score(features,labels,feature_names):
 def hopkins_test(instance):
     h = hopkins(instance.points)
     return h > 0.75,7
+
+
+def feature_eval(features,labels,target,feature_names):
+    assert len(features) > 0 and len(features[0]) == len(feature_names)
+    indx = feature_names.index(target)
+    best = co = float('-inf')
+    for cutoff in [0.01, 0.05, 0.1, 0.2 ,0.3, 0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.99]:
+        tot = 0
+        for i in range(len(features)):
+            c = features[i][indx] < cutoff
+            #c_gt = features[i][indx] > cutoff
+            l = labels[i] == 0.0
+            if c == l:
+                tot += 1
+        s = tot / len(features)
+        if s > best:
+            best = s
+            co = cutoff
+    return best,co

@@ -5,7 +5,7 @@ import random
 import matplotlib.pyplot as plt
 from src.util import printer
 from src.gen import instance_gen
-from src.algorithms.ackerman import ackerman_score
+from src.algorithms.ackerman import ackerman_score,feature_eval
 from src.algorithms.classifier import  instance2features,get_feature_names
 import pdb
 from sklearn import linear_model
@@ -25,6 +25,8 @@ inputs = []
 feature_names = get_feature_names()
 print(feature_names)
 
+
+
 for line in sys.stdin.readlines():
     line = line.replace("array([","")
     line = line.replace("])","")
@@ -43,6 +45,22 @@ for i in range(N):
         labels[i] = 0.0
     else:
         labels[i] = 1.0
+
+
+target = 'eucld_dip_p_value'
+print(target,feature_eval(features,labels,target,feature_names))
+
+target = 'pnorm_dip_p_value'
+print(target,feature_eval(features,labels,target,feature_names))
+
+target = 'cheb_dip_p_value'
+print(target,feature_eval(features,labels,target,feature_names))
+
+target = 'taxi_dip_p_value'
+print(target,feature_eval(features,labels,target,feature_names))
+
+target = 'minkowski_dip_p_value'
+print(target,feature_eval(features,labels,target,feature_names))
 
 print(len(features[0]))
 print("Without Noise Stat")
@@ -67,8 +85,9 @@ print()
 print("With Noise Stat")
 
 ns_model = NoiseStat()
-print(ns_model.noise_test(features,labels))
-
+print("dnn", ns_model.noise_test(features,labels,'dnn'))
+print("svm", ns_model.noise_test(features,labels,'svm'))
+print("lm" , ns_model.noise_test(features,labels,'lm'))
 ns = ns_model.predict(features)
 for i in range(len(features)):
     features[i].append(ns[i])

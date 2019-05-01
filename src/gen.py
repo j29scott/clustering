@@ -49,3 +49,10 @@ def instance_rand_noise_gen(N=1):
     if N==1:
         return instances[0],labels[0]
     return instances,labels
+
+def break_gen():
+    return Gaussian(dim=2,
+                                num_clusters=random.choice(range(2,3+1)),
+                                N=250,
+                                noise_frac= 0.10 + random.random()/10.0
+            )
